@@ -18,6 +18,7 @@ public class UIManager: MonoBehaviour
         }
         
         InitScreens();
+        ShowScreen(ScreenTypes.Home);
     }
     
     private void InitScreens()

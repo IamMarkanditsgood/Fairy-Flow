@@ -5,18 +5,16 @@ using UnityEngine.UI;
 
 public class Info : BasicScreen
 {
-    public Button _back;
-
+    [SerializeField] private Button _closeButton;
     private void Start()
     {
-        _back.onClick.AddListener(Close);
+        _closeButton.onClick.AddListener(Close);
     }
 
     private void OnDestroy()
     {
-        _back.onClick.RemoveListener(Close);
+        _closeButton.onClick.RemoveListener(Close);
     }
-
 
     public override void ResetScreen()
     {
@@ -25,7 +23,6 @@ public class Info : BasicScreen
     public override void SetScreen()
     {
     }
-
     private void Close()
     {
         UIManager.Instance.ShowScreen(ScreenTypes.Profile);

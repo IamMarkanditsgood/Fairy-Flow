@@ -135,8 +135,8 @@ public class GameManager : MonoBehaviour
             unlockedLevels.Add(level);
             if(level != 1 && level != 7)
             {
-                NewChickenPopup newChickenPopup = (NewChickenPopup) UIManager.Instance.GetPopup(PopupTypes.NewChicken);
-                newChickenPopup.Init(level);
+                //NewChickenPopup newChickenPopup = (NewChickenPopup) UIManager.Instance.GetPopup(PopupTypes.NewChicken);
+                //newChickenPopup.Init(level);
                 UIManager.Instance.ShowPopup(PopupTypes.NewChicken);
             }
             else if(level == 7)

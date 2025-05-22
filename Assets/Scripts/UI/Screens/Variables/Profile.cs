@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -7,113 +6,128 @@ using UnityEngine.UI;
 
 public class Profile : BasicScreen
 {
-    public Button s;
-    public Button H;
-    public Button i;
-    public Button avatar;
-    public TMP_Text timeToHome;
-    private TextManager textManager = new TextManager();
-    public AvatarManager avatarManager;
-    public TMP_InputField name;
-
-    public Image[] achievementsImage;
-    public Sprite[] openedAchievements;
+    [SerializeField] private AvatarManager avatarManager;
+    [SerializeField] private Button _homeButton;
+    [SerializeField] private Button _infoButton;
+    [SerializeField] private Button _stories;
+    [SerializeField] private Button _avatar;
 
 
-    [SerializeField] private TMP_Text displayText; // посилання на UI Text
+    [SerializeField] private TMP_InputField _name;
+    [SerializeField] private TMP_Text _coins;
 
-    private const string FirstLaunchKey = "FirstLaunchDate";
+    [SerializeField] private Image _ahcieve;
+    [SerializeField] private Sprite _openedAchieve;
 
-    void Start()
+    public Button[] popupsButton;
+    public GameObject _popupsView;
+    public GameObject[] popups;
+    public Button[] okButtons;
+
+    private void Start()
     {
-        textManager.SetText("10", timeToHome);
-        s.onClick.AddListener(Shop);
-        H.onClick.AddListener(Home);
-        i.onClick.AddListener(Info);
-        avatar.onClick.AddListener(Avatar);
+        _homeButton.onClick.AddListener(HomeButton);
+        _infoButton.onClick.AddListener(InfoButton);
+        _stories.onClick.AddListener(Stories);
+        _avatar.onClick.AddListener(avatarManager.PickFromGallery);
 
-        GameEvents.OnNewTime += UdpateTimer;
+        for(int i = 0; i < popupsButton.Length; i++)
+        {
+            int index = i;
+            popupsButton[index].onClick.AddListener(() => OpenPopup(index));
+        }
+        for (int i = 0; i < okButtons.Length; i++)
+        {
+            int index = i;
+            okButtons[index].onClick.AddListener(() => ClosePopups());
+        }
     }
-
-    // Update is called once per frame
-    void OnDestroy()
+    private void OnDestroy()
     {
-        s.onClick.RemoveListener(Shop);
-        H.onClick.RemoveListener(Home);
-        i.onClick.RemoveListener(Info);
-        avatar.onClick.RemoveListener(Avatar);
+        _homeButton.onClick.RemoveListener(HomeButton);
+        _infoButton.onClick.RemoveListener(InfoButton);
+        _stories.onClick.RemoveListener(Stories);
+        _avatar.onClick.RemoveListener(avatarManager.PickFromGallery);
 
-        GameEvents.OnNewTime -= UdpateTimer;
+        for (int i = 0; i < popupsButton.Length; i++)
+        {
+            int index = i;
+            popupsButton[index].onClick.RemoveListener(() => OpenPopup(index));
+        }
+        for (int i = 0; i < okButtons.Length; i++)
+        {
+            int index = i;
+            okButtons[index].onClick.RemoveListener(() => ClosePopups());
+        }
     }
 
     private void OnApplicationQuit()
     {
-        PlayerPrefs.SetString("Name", name.text);
+        if(_name.text != PlayerPrefs.GetString("Name", "User Name"))
+        {
+            PlayerPrefs.SetString("Name", _name.text);
+        }
+    }
+
+    public override void ResetScreen()
+    {
     }
 
     public override void SetScreen()
     {
-
         avatarManager.SetSavedPicture();
-        name.text = PlayerPrefs.GetString("Name", "USER_NAME");
-        SetTimer();
-        SetAchievements();
+        ConfigScreen();
     }
 
-
-    public void UdpateTimer(int time)
+    private void ConfigScreen()
     {
-        textManager.SetText(time, timeToHome);
-    }
+        _name.text = PlayerPrefs.GetString("Name", "User Name");
+        _coins.text = PlayerPrefs.GetInt("Coins").ToString();
 
-    public override void ResetScreen()
-    { 
-    }
-
-    private void SetTimer()
-    {
-        string savedDate = PlayerPrefs.GetString(FirstLaunchKey, "");
-
-        if (string.IsNullOrEmpty(savedDate))
+        if (PlayerPrefs.HasKey("Achieve"))
         {
-            savedDate = DateTime.Now.ToString("dd.MM.yyyy");
-            PlayerPrefs.SetString(FirstLaunchKey, savedDate);
-            PlayerPrefs.Save();
-        }
-
-        displayText.text = $"In the game\nsince {savedDate}";
-    }
-
-    private void SetAchievements()
-    {
-        for(int i = 0; i < achievementsImage.Length; i++)
-        {
-            string key = "Achieve" + i;
-            if (PlayerPrefs.GetInt(key) == 1)
-            {
-                achievementsImage[i].sprite = openedAchievements[i];
-            }
+            _ahcieve.sprite = _openedAchieve;
         }
     }
-    private void Shop()
-    {
-        UIManager.Instance.ShowScreen(ScreenTypes.Shop);
-        PlayerPrefs.SetString("Name", name.text);
-    }
 
-    private void Home()
+    private void HomeButton()
     {
-        UIManager.Instance.ShowScreen(ScreenTypes.Game);
-        PlayerPrefs.SetString("Name", name.text);
+        if (_name.text != PlayerPrefs.GetString("Name", "User Name"))
+        {
+            PlayerPrefs.SetString("Name", _name.text);
+        }
+        UIManager.Instance.ShowScreen(ScreenTypes.Home);
     }
-
-    private void Info()
+    private void InfoButton()
     {
+        if (_name.text != PlayerPrefs.GetString("Name", "User Name"))
+        {
+            PlayerPrefs.SetString("Name", _name.text);
+        }
         UIManager.Instance.ShowScreen(ScreenTypes.Info);
-        PlayerPrefs.SetString("Name", name.text);
     }
-    private void Avatar()
+
+    private void Stories()
     {
-        avatarManager.PickFromGallery();
+        if (_name.text != PlayerPrefs.GetString("Name", "User Name"))
+        {
+            PlayerPrefs.SetString("Name", _name.text);
+        }
+        UIManager.Instance.ShowScreen(ScreenTypes.Stories);
+    }
+
+    private void OpenPopup(int index)
+    {
+        popups[index].SetActive(true);
+        _popupsView.SetActive(true);
+    }
+
+    private void ClosePopups()
+    {
+        foreach(var popup in popups)
+        {
+            popup.SetActive(false); 
+        }
+        _popupsView.SetActive(false);
     }
 }
