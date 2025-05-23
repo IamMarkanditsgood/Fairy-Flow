@@ -7,4 +7,6 @@ public enum ScreenTypes
     Story,
     Profile,
     Info,
+    Bascket,
+
 }

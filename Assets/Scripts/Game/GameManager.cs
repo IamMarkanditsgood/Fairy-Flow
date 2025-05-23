@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
             timer += Time.deltaTime;
             float remaining = spawnInterval - (timer % spawnInterval);
 
-            GameEvents.NewTime((int)remaining);
+            //GameEvents.NewTime((int)remaining);
 
             HandleIncome();
         }
@@ -137,12 +137,12 @@ public class GameManager : MonoBehaviour
             {
                 //NewChickenPopup newChickenPopup = (NewChickenPopup) UIManager.Instance.GetPopup(PopupTypes.NewChicken);
                 //newChickenPopup.Init(level);
-                UIManager.Instance.ShowPopup(PopupTypes.NewChicken);
+               // UIManager.Instance.ShowPopup(PopupTypes.NewChicken);
             }
             else if(level == 7)
             {
                 Destroy(newChicken);
-                UIManager.Instance.ShowPopup(PopupTypes.MaxChickecn);
+                //UIManager.Instance.ShowPopup(PopupTypes.MaxChickecn);
                 AddCoins(200);
             }
         }
@@ -161,7 +161,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateCoinText()
     {
-        GameEvents.NewCoins(coins);
+       // GameEvents.NewCoins(coins);
     }
     private void UpdateIncomeText()
     {
@@ -171,7 +171,7 @@ public class GameManager : MonoBehaviour
             totalIncome += chicken.GetProfitPerSecond();
         }
 
-        GameEvents.NewReward(totalIncome);
+        //GameEvents.NewReward(totalIncome);
     }
     public int GetMaxLevel() => chickenPrefab.GetComponent<MergeChicken>().MaxLevel;
 }

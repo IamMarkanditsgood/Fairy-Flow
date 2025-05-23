@@ -1,5 +1,7 @@
 public enum PopupTypes 
 {
-    NewChicken,
-    MaxChickecn,
+    BascketPopup,
+    ShopPopup,
+    EnergyPopup,
+    RewardPopup,
 }
