@@ -12,15 +12,13 @@ public class InventoryManager : MonoBehaviour
     {
         if(Instance == null)
             Instance = this;
-    }
 
-    private void Start()
-    {
         foreach (SweetTypes sweet in Enum.GetValues(typeof(SweetTypes)))
         {
             _sweetCounts[sweet] = 0;
         }
     }
+
     public void AddSweet(SweetTypes sweet, int amount = 1)
     {
         if (!_sweetCounts.ContainsKey(sweet))

@@ -10,17 +10,22 @@ public class UIManager: MonoBehaviour
 
     public static UIManager Instance { get; private set; }
 
-    public void Start()
+    public void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
         }
         
+        
+    }
+
+    public void Start()
+    {
         InitScreens();
         ShowScreen(ScreenTypes.Home);
     }
-    
+
     private void InitScreens()
     {
         foreach (var screen in _screens)

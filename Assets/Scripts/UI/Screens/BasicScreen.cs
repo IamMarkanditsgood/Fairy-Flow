@@ -7,6 +7,8 @@ public abstract class BasicScreen : MonoBehaviour
     [SerializeField] private GameObject _view;
     [SerializeField] private ScreenTypes _screenType;
 
+    public bool isActive;
+
     public ScreenTypes ScreenType => _screenType;
 
     public virtual void Init()
@@ -17,10 +19,12 @@ public abstract class BasicScreen : MonoBehaviour
     {
         SetScreen();
         _view.SetActive(true);
+        isActive = true;
     }
     public virtual void Hide() 
     {
         ResetScreen();
+        isActive = false;
         _view.SetActive(false);
     }
 

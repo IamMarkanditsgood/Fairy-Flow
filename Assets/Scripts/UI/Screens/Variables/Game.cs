@@ -5,7 +5,6 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 public class Game : BasicScreen
 {
@@ -14,9 +13,14 @@ public class Game : BasicScreen
     [SerializeField] private Button _bascketButton;
     [SerializeField] private Button _shopButton;
     [SerializeField] private Button _energyButton;
+    [SerializeField] private Button _close;
 
     [SerializeField] private TMP_Text _energyText;
     [SerializeField] private TMP_Text _coinsText;
+
+    private const int maxEnergy = 120;
+    private const string energyKey = "Energy";
+    private const string lastExitKey = "LastExitTime";
 
     public override void Init()
     {
@@ -26,16 +30,17 @@ public class Game : BasicScreen
 
     public void Start()
     {
-       
+        
         _gamePlayManager.Subscibe();
 
         _bascketButton.onClick.AddListener(BascketOpen);
         _shopButton.onClick.AddListener(ShopOpen);
         _energyButton.onClick.AddListener(EnergyPressed);
+        _close.onClick.AddListener(Close);
 
         GameEvents.OnEnergyUpdate += UpdateEnergy;
         GameEvents.OnCoinsUpdate += UpdateCoins;
-
+        RestoreEnergy();
         _gamePlayManager.StartGame();
     }
 
@@ -46,9 +51,50 @@ public class Game : BasicScreen
         _bascketButton.onClick.RemoveListener(BascketOpen);
         _shopButton.onClick.RemoveListener(ShopOpen);
         _energyButton.onClick.RemoveListener(EnergyPressed);
+        _close.onClick.RemoveListener(Close);
 
         GameEvents.OnEnergyUpdate -= UpdateEnergy;
         GameEvents.OnCoinsUpdate -= UpdateCoins;
+    }
+    private void RestoreEnergy()
+    {
+        int currentEnergy = PlayerPrefs.GetInt(energyKey, maxEnergy); // Якщо немає значення — максимум
+
+        if (PlayerPrefs.HasKey(lastExitKey))
+        {
+            string lastExitString = PlayerPrefs.GetString(lastExitKey);
+            DateTime lastExitTime = DateTime.Parse(lastExitString);
+            TimeSpan timePassed = DateTime.UtcNow - lastExitTime;
+
+            int hoursPassed = Mathf.FloorToInt((float)timePassed.TotalHours);
+            if (hoursPassed > 0)
+            {
+                currentEnergy = Mathf.Min(currentEnergy + hoursPassed, maxEnergy);
+                PlayerPrefs.SetInt(energyKey, currentEnergy);
+            }
+        }
+        PlayerPrefs.SetInt(energyKey, currentEnergy);
+        Debug.Log("Energy restored: " + currentEnergy);
+        PlayerPrefs.Save();
+        Debug.Log(PlayerPrefs.GetInt(energyKey, maxEnergy));
+        GameEvents.UpdateEnergy();  
+    }
+
+    void OnApplicationQuit()
+    {
+        SaveExitTime();
+    }
+
+    void OnApplicationPause(bool pause)
+    {
+        if (pause)
+            SaveExitTime();
+    }
+
+    private void SaveExitTime()
+    {
+        PlayerPrefs.SetString(lastExitKey, DateTime.UtcNow.ToString());
+        PlayerPrefs.Save();
     }
 
     public override void ResetScreen()
@@ -57,7 +103,7 @@ public class Game : BasicScreen
 
     public override void SetScreen()
     {
-
+        _gamePlayManager.SetScreen();
         UpdateCoins();
         UpdateEnergy();
     }
@@ -79,7 +125,8 @@ public class Game : BasicScreen
 
     private void UpdateEnergy()
     {
-        _energyText.text = PlayerPrefs.GetInt("Energy",120).ToString();
+        Debug.Log(PlayerPrefs.GetInt(energyKey, maxEnergy));
+        _energyText.text = PlayerPrefs.GetInt(energyKey, maxEnergy).ToString();
     }
 
     private void EnergyPressed()
@@ -95,6 +142,11 @@ public class Game : BasicScreen
         UIManager.Instance.ShowScreen(ScreenTypes.Shop);
     }
 
+    private void Close()
+    {
+        UIManager.Instance.ShowScreen(ScreenTypes.Home);
+    }
+
 
 }
 
@@ -106,6 +158,7 @@ public class GamePlayManager
     {
         public SweetTypes sweetType;
         public Sprite image;
+        public int coinReward;
     }
 
     [Serializable]
@@ -117,9 +170,26 @@ public class GamePlayManager
         public SweetTypes currentSweet = SweetTypes.None;
     }
 
+    [Serializable]
+    public class TaskData
+    {
+        public SweetTypes[] sweets;
+        public Image[] sweetImges;
+        public Image[] doneImages;
+        public TMP_Text[] countText;
+        public int[] amount;
+        public bool[] isDone;
+
+        public TMP_Text coinsRewardText;
+        public TMP_Text energyRewardText;
+
+        public int coinsReward;
+        public int energyReward;
+    }
+
     [SerializeField] private SweetData[] _sweets;
     [SerializeField] private CellData[] _cells;
-
+    [SerializeField] private TaskData[] _tasks;
 
     private Vector2 _currentSelectedCell = new Vector2(-1, -1);
 
@@ -140,6 +210,11 @@ public class GamePlayManager
             int index = i;
             _cells[index].cell.GetComponent<Button>().onClick.RemoveListener(() => CellPressed(new Vector2(_cells[index].colum, _cells[index].row)));
         }
+    }
+
+    public void SetScreen()
+    {
+        CheckTasks();
     }
 
     public void StartGame()
@@ -172,7 +247,7 @@ public class GamePlayManager
         {
             if (cell.currentSweet == SweetTypes.None)
             {
-                ToggleCell(cell, sweet);
+                ToggleCell(cell, sweet, true);
                 return;
             }
         }
@@ -189,10 +264,108 @@ public class GamePlayManager
             if (UnityEngine.Random.value > 0.5f)
             {
                 SweetTypes randomSweet = GetRandomSweet();
-                ToggleCell(_cells[i], randomSweet);       
+                ToggleCell(_cells[i], randomSweet, true);       
+            }
+        }
+        SetTasks();
+
+        CheckTasks();
+    }
+
+    // Tasks
+    private void SetTasks()
+    {
+        foreach(var task in _tasks)
+        {
+            SetTask(task);
+        }
+    }
+
+    private void SetTask(TaskData task)
+    {
+        task.coinsReward = 0;
+        task.energyReward = 0;
+        for (int i = 0; i < task.sweets.Length; i++)
+        {
+            task.sweets[i] = GetRandomSweet();
+            task.sweetImges[i].sprite = GetSweetSprite(task.sweets[i]);
+            task.doneImages[i].enabled = false;
+            task.amount[i] = UnityEngine.Random.Range(1, 11);
+            task.countText[i].text = task.amount[i].ToString();
+
+            task.isDone[i] = false;
+
+            task.coinsReward += task.amount[i];
+            task.energyReward += task.amount[i] / 2;
+
+            task.coinsReward *= 2;
+
+            task.coinsRewardText.text = task.coinsReward.ToString();
+            task.energyRewardText.text = task.energyReward.ToString();
+        }
+        if (UIManager.Instance.GetScreen(ScreenTypes.Game).isActive)
+        {
+            CheckTasks();
+        }
+    }
+
+    private void CheckTasks()
+    {
+        for(int i = 0; i < _tasks.Length; i++)
+        {
+            for (int j =0; j < _tasks[i].sweets.Length; j++ )
+            {
+                if (InventoryManager.Instance.GetCountOfSweet(_tasks[i].sweets[j]) == _tasks[i].amount[j])
+                {
+                    _tasks[i].isDone[j] = true;
+                    _tasks[i].doneImages[j].enabled = true;
+                }
             }
         }
 
+        for (int i = 0; i < _tasks.Length; i++)
+        {
+            int correct = 0;
+            for (int j = 0; j < _tasks[i].sweets.Length; j++)
+            {
+                if (_tasks[i].isDone[j])
+                {
+                    correct++;
+                }
+            }
+            if(correct == _tasks[i].sweets.Length && UIManager.Instance.GetScreen(ScreenTypes.Game).isActive)
+            {
+                GiveReward(_tasks[i]);
+                SetTask(_tasks[i]);
+            }
+        }
+    }
+
+    private void GiveReward(TaskData taskData)
+    {
+        TaskPopup taskPopup = (TaskPopup)UIManager.Instance.GetPopup(PopupTypes.RewardPopup);
+
+        List<Sprite> sweetSprites = new List<Sprite>();
+        foreach(var sweet in taskData.sweets)
+        {
+            sweetSprites.Add(GetSweetSprite(sweet));
+        }
+
+        List<int> amounts = new List<int>();
+        amounts.AddRange(taskData.amount);
+        taskPopup.SetPopup(sweetSprites, amounts, taskData.coinsReward, taskData.energyReward);
+
+        taskPopup.Show();
+
+        int coins = PlayerPrefs.GetInt("Coins");
+        coins += taskData.coinsReward;
+        PlayerPrefs.SetInt("Coins", coins);
+        GameEvents.UpdateCoins();
+
+        int energy = PlayerPrefs.GetInt("Energy", 120);
+        energy += taskData.energyReward;
+        PlayerPrefs.SetInt("Energy", energy);
+        GameEvents.UpdateEnergy();
     }
 
     private void CellPressed(Vector2 coordinates)
@@ -212,6 +385,17 @@ public class GamePlayManager
                 ToggleCell(prevCell);
                 
                 SweetTypes newSweet = GetNextEnumValue(cell.currentSweet);
+
+                if(newSweet == SweetTypes.None)
+                {
+                    int reward = GetSweetReward(SweetTypes.Candy16);
+                    reward += PlayerPrefs.GetInt("Coins");
+                    PlayerPrefs.SetInt("Coins", reward);
+                    GameEvents.UpdateCoins();
+
+                    
+                }
+
                 ToggleCell(cell, newSweet);
 
                 AnimateScale(cell.cell.transform);
@@ -225,20 +409,38 @@ public class GamePlayManager
             _currentSelectedCell = new Vector2(-1, -1);
         }
     }
-    private void ToggleCell(CellData cell, SweetTypes sweet = SweetTypes.None)
+
+
+
+    private void ToggleCell(CellData cell, SweetTypes sweet = SweetTypes.None, bool isBought = false)
     {
         InventoryManager.Instance.RemoveSweet(cell.currentSweet);
         InventoryManager.Instance.AddSweet(sweet);
 
-        Debug.Log("Remove " + cell.currentSweet);
-        Debug.Log("Add " + sweet);
+        cell.cell.transform.localScale = Vector3.one;
 
-        if(sweet != SweetTypes.None)
+        if (sweet != SweetTypes.None)
         {
             cell.cell.GetComponent<Button>().enabled = true;
             cell.cell.GetComponent<Image>().enabled = true;
             cell.currentSweet = sweet;
             cell.cell.GetComponent<Image>().sprite = GetSweetSprite(cell.currentSweet);
+            
+            if (!isBought)
+            {
+                PlayerPrefs.SetInt("Achieve", 1);
+                int reward = GetSweetReward(sweet);
+                reward += PlayerPrefs.GetInt("Coins");
+                PlayerPrefs.SetInt("Coins", reward);
+                ChangeEnergy();
+                GameEvents.UpdateCoins();
+            }
+
+            if (UIManager.Instance.GetScreen(ScreenTypes.Game).isActive)
+            {
+                CheckTasks();
+            }
+
         }
         else
         {
@@ -247,6 +449,14 @@ public class GamePlayManager
             cell.currentSweet = sweet;
         }
 
+    }
+
+    private void ChangeEnergy()
+    {
+        int energy = PlayerPrefs.GetInt("Energy", 120);
+        energy--;
+        PlayerPrefs.SetInt("Energy", energy);
+        GameEvents.UpdateEnergy();
     }
 
     private Sprite GetSweetSprite(SweetTypes sweetType)
@@ -260,6 +470,18 @@ public class GamePlayManager
         }
 
         return null;
+    }
+    private int GetSweetReward(SweetTypes sweetType)
+    {
+        foreach (var sweet in _sweets)
+        {
+            if (sweetType == sweet.sweetType)
+            {
+                return sweet.coinReward;
+            }
+        }
+
+        return 0;
     }
 
     private SweetTypes GetRandomSweet()

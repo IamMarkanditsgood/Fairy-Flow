@@ -71,11 +71,11 @@ public class Stories : BasicScreen
     }
     private void UnlockStory(int index)
     {
-        int score = PlayerPrefs.GetInt("Score");
+        int score = PlayerPrefs.GetInt("Coins");
         if (score >= 2000)
         {
             score -= 2000;
-            PlayerPrefs.SetInt("Score", score);
+            PlayerPrefs.SetInt("Coins", score);
 
             string key = "Story" + index;
             PlayerPrefs.SetInt(key, 1);
