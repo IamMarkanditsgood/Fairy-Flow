@@ -79,8 +79,9 @@ public class Bascket : BasicScreen
 
     private void PlaceToBascket(int index)
     {
+ 
         SweetTypes[] sweetTypes = (SweetTypes[])Enum.GetValues(typeof(SweetTypes));
-
+        Debug.Log(sweetTypes[index]);
         if (InventoryManager.Instance.GetCountOfSweet(sweetTypes[index]) > 0)
         {
             MoveBascket moveBascket = (MoveBascket)UIManager.Instance.GetPopup(PopupTypes.BascketPopup);
