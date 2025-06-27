@@ -8207,52 +8207,52 @@ MonoBehaviour:
   _gamePlayManager:
     _sweets:
     - sweetType: 0
-      image: {fileID: 21300000, guid: ef864ed0023b9cb48ac0179f4a507c4e, type: 3}
+      image: {fileID: 21300000, guid: 0aacf98188fd4174cb37fc7d29594381, type: 3}
       coinReward: 100
     - sweetType: 1
-      image: {fileID: 21300000, guid: 69c6b69583638a0409969c1f517636a6, type: 3}
+      image: {fileID: 21300000, guid: 4a41bc3258c5e4c48a29de725e3c8289, type: 3}
       coinReward: 150
     - sweetType: 2
-      image: {fileID: 21300000, guid: 89ef5fef61edd8749a65a1d8fbef8f1b, type: 3}
+      image: {fileID: 21300000, guid: 525190b5c75421a438fb6d67a95613fe, type: 3}
       coinReward: 200
     - sweetType: 3
-      image: {fileID: 21300000, guid: 323c77daaa54b064aa997137d02775aa, type: 3}
+      image: {fileID: 21300000, guid: feabc2b93ac27874888675cff1624830, type: 3}
       coinReward: 250
     - sweetType: 4
-      image: {fileID: 21300000, guid: 553d76f8de1089d458eda024c6b9ac78, type: 3}
+      image: {fileID: 21300000, guid: 55288ec87b2be304dab54993e9b37e7e, type: 3}
       coinReward: 300
     - sweetType: 5
-      image: {fileID: 21300000, guid: 09ec763b3e669a541841d020774a9d25, type: 3}
+      image: {fileID: 21300000, guid: 366bea8d0face7540aaf668f07b1bafe, type: 3}
       coinReward: 300
     - sweetType: 6
-      image: {fileID: 21300000, guid: 0564325d8468a6e46a48839e6d2837ea, type: 3}
+      image: {fileID: 21300000, guid: 0e4c97d2ccceaa64b9a4d2bc402cc1c6, type: 3}
       coinReward: 350
     - sweetType: 7
-      image: {fileID: 21300000, guid: ef0e5999f1e098944b24e3528cb494e3, type: 3}
+      image: {fileID: 21300000, guid: 985a300d4d3c9bf48ab72b24ebb3609e, type: 3}
       coinReward: 400
     - sweetType: 8
-      image: {fileID: 21300000, guid: 985a300d4d3c9bf48ab72b24ebb3609e, type: 3}
+      image: {fileID: 21300000, guid: ef0e5999f1e098944b24e3528cb494e3, type: 3}
       coinReward: 450
     - sweetType: 9
-      image: {fileID: 21300000, guid: 0e4c97d2ccceaa64b9a4d2bc402cc1c6, type: 3}
+      image: {fileID: 21300000, guid: 0564325d8468a6e46a48839e6d2837ea, type: 3}
       coinReward: 500
     - sweetType: 10
-      image: {fileID: 21300000, guid: 366bea8d0face7540aaf668f07b1bafe, type: 3}
+      image: {fileID: 21300000, guid: 09ec763b3e669a541841d020774a9d25, type: 3}
       coinReward: 600
     - sweetType: 11
-      image: {fileID: 21300000, guid: 55288ec87b2be304dab54993e9b37e7e, type: 3}
+      image: {fileID: 21300000, guid: 553d76f8de1089d458eda024c6b9ac78, type: 3}
       coinReward: 650
     - sweetType: 12
-      image: {fileID: 21300000, guid: feabc2b93ac27874888675cff1624830, type: 3}
+      image: {fileID: 21300000, guid: 323c77daaa54b064aa997137d02775aa, type: 3}
       coinReward: 700
     - sweetType: 13
-      image: {fileID: 21300000, guid: 525190b5c75421a438fb6d67a95613fe, type: 3}
+      image: {fileID: 21300000, guid: 89ef5fef61edd8749a65a1d8fbef8f1b, type: 3}
       coinReward: 800
     - sweetType: 14
-      image: {fileID: 21300000, guid: 4a41bc3258c5e4c48a29de725e3c8289, type: 3}
+      image: {fileID: 21300000, guid: 69c6b69583638a0409969c1f517636a6, type: 3}
       coinReward: 900
     - sweetType: 15
-      image: {fileID: 21300000, guid: 0aacf98188fd4174cb37fc7d29594381, type: 3}
+      image: {fileID: 21300000, guid: ef864ed0023b9cb48ac0179f4a507c4e, type: 3}
       coinReward: 1000
     _cells:
     - colum: 0
